@@ -1,6 +1,17 @@
-# CSIRO Image2Biomass EDA
+# CSIRO Image2Biomass
 
-EDA notebook for the Kaggle competition: [CSIRO Biomass](https://www.kaggle.com/competitions/csiro-biomass).
+<p>
+  <img alt="Kaggle" src="https://img.shields.io/badge/Kaggle-CSIRO%20Biomass-20BEFF?style=flat&logo=kaggle&logoColor=white" height="20">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.x-3776AB?style=flat&logo=python&logoColor=white" height="20">
+  <img alt="Notebook" src="https://img.shields.io/badge/Notebook-EDA%20%2B%20Baseline-F37626?style=flat&logo=jupyter&logoColor=white" height="20">
+  <img alt="Status" src="https://img.shields.io/badge/Status-Active%20Research-2E7D32?style=flat" height="20">
+</p>
+
+<p>
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaFVH5mpwoLOtAJYfCoJse_jbrvwt49_IxKw&s" alt="Pasture biomass image" width="520">
+</p>
+
+Kaggle workflow for the [CSIRO Image2Biomass Prediction](https://www.kaggle.com/competitions/csiro-biomass) competition. The project explores pasture image, metadata, and measurement signals before building baseline models for biomass prediction.
 
 The task is to predict five pasture biomass targets for each image:
 
@@ -32,7 +43,7 @@ The competition uses one global weighted R2 over all image-target rows. Target w
 
 ## Kaggle Workflow
 
-This repo is intended to be run inside a Kaggle notebook with the competition input mounted at:
+This repo is intended to run inside Kaggle notebooks with the competition input mounted at:
 
 ```text
 /kaggle/input/competitions/csiro-biomass/
@@ -68,6 +79,29 @@ eda_segment_error.csv
 train_image_features.csv
 test_image_features.csv
 ```
+
+## EDA Findings
+
+Current EDA output points to a few modeling priorities:
+
+- `Dry_Total_g` is the most important target for the leaderboard because it carries 50% of the effective metric weight.
+- `Dry_Total_g` also has the widest spread and the highest lightweight-model MAE, so calibration here should be treated as the first modeling priority.
+- `Dry_Total_g` exactly matches the component sum in the EDA checks, making target relationship constraints useful as validation sanity checks and possible post-processing.
+- `Height_Ave_cm` has strong monotonic signal for `Dry_Green_g` with Spearman correlation around `0.80`.
+- `Pre_GSHH_NDVI` is most associated with `GDM_g`, with Spearman correlation around `0.59`.
+- Simple image greenness features are useful: `excess_green` is strongest against `GDM_g`, around `0.52`.
+
+Hardest diagnostic segments from the lightweight EDA model:
+
+| target | state | MAE | bias | target mean |
+| --- | --- | ---: | ---: | ---: |
+| `Dry_Total_g` | NSW | 18.86 | -0.57 | 70.90 |
+| `Dry_Green_g` | NSW | 14.78 | -0.03 | 56.56 |
+| `GDM_g` | NSW | 14.75 | 1.36 | 56.69 |
+| `Dry_Clover_g` | WA | 11.17 | -1.21 | 22.09 |
+| `Dry_Total_g` | Tas | 9.88 | -0.22 | 36.80 |
+
+Outlier review suggests many legitimate zero-valued clover and dead-matter rows, especially where species composition does not include clover or where WA samples have no dead matter. High-biomass NSW rows should be visually reviewed because they dominate the largest `Dry_Total_g`, `Dry_Green_g`, and `GDM_g` extremes.
 
 ## Baseline Models
 
