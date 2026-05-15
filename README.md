@@ -8,7 +8,7 @@
 </p>
 
 <p>
-  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaFVH5mpwoLOtAJYfCoJse_jbrvwt49_IxKw&s" alt="Pasture biomass image" width="520">
+  <img src="https://reneweconomy.com.au/wp-content/uploads/2021/02/redbank-power-station-hunter-energy-optimised.jpg" alt="Agricultural biomass landscape" width="520">
 </p>
 
 Kaggle workflow for the [CSIRO Image2Biomass Prediction](https://www.kaggle.com/competitions/csiro-biomass) competition. The project explores pasture image, metadata, and measurement signals before building baseline models for biomass prediction.
