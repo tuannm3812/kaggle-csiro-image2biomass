@@ -109,8 +109,11 @@ Open [notebooks/02_baseline_models.ipynb](notebooks/02_baseline_models.ipynb) af
 
 - reviews available EDA output artifacts
 - uses grouped cross-validation by `image_path`
+- drops train-only metadata when the Kaggle test file does not provide it
+- trains with metric-aligned target weights
 - compares median, ridge, histogram gradient boosting, and extra-trees baselines
 - reports global weighted R2 plus per-target and segment diagnostics
+- validates whether enforcing `Dry_Total_g = Dry_Green_g + Dry_Dead_g + Dry_Clover_g` improves local score
 - writes `/kaggle/working/submission.csv`
 
 It also exports:
