@@ -1,6 +1,6 @@
-# CSIRO Image2Biomass Kaggle Starter
+# CSIRO Image2Biomass EDA
 
-Starter repo for the Kaggle competition: [CSIRO Biomass](https://www.kaggle.com/competitions/csiro-biomass).
+EDA notebook for the Kaggle competition: [CSIRO Biomass](https://www.kaggle.com/competitions/csiro-biomass).
 
 The task is to predict five pasture biomass targets for each image:
 
@@ -25,15 +25,7 @@ The competition uses one global weighted R2 over all image-target rows. Target w
 ```text
 .
 +-- notebooks/
-|   +-- 01_eda_baseline.ipynb
-+-- src/
-|   +-- csiro_biomass/
-|       +-- __init__.py
-|       +-- data.py
-|       +-- features.py
-|       +-- metrics.py
-+-- requirements.txt
-+-- kaggle_setup.md
+|   +-- 01_deep_dive_eda.ipynb
 +-- README.md
 ```
 
@@ -52,17 +44,29 @@ This repo is intended to be run inside a Kaggle notebook with the competition in
 
 ## First Notebook
 
-Open [notebooks/01_eda_baseline.ipynb](notebooks/01_eda_baseline.ipynb). It builds a simple, submission-ready baseline using:
+Open [notebooks/01_deep_dive_eda.ipynb](notebooks/01_deep_dive_eda.ipynb). It focuses on deep exploratory analysis:
 
-- metadata features from `train.csv`
-- simple image color/texture features
-- per-target tree models
-- competition-style weighted R2 validation
-- `/kaggle/working/submission.csv` generation
+- data quality checks
+- metric weight analysis
+- target distributions and image-level target accounting
+- state, species, date, NDVI, and height effects
+- train-test metadata drift
+- simple image color/texture signals
+- visual image audit grids
+- outlier review exports
+- lightweight baseline error diagnostics for insight generation
 
 In Kaggle, upload or paste the notebook, add the competition data, run all cells, and download the output artifacts from the notebook output panel.
 
-The notebook is self-contained. The `src/` package mirrors its helper functions for versioned development, but Kaggle does not need an editable package install.
+The notebook is self-contained and assumes Kaggle's standard Python environment. It writes EDA artifacts to `/kaggle/working`:
+
+```text
+eda_insights.csv
+eda_outlier_review.csv
+eda_segment_error.csv
+train_image_features.csv
+test_image_features.csv
+```
 
 ## Next Experiments
 
