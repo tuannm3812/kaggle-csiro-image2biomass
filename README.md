@@ -26,6 +26,7 @@ The competition uses one global weighted R2 over all image-target rows. Target w
 .
 +-- notebooks/
 |   +-- 01_deep_dive_eda.ipynb
+|   +-- 02_baseline_models.ipynb
 +-- README.md
 ```
 
@@ -66,6 +67,25 @@ eda_outlier_review.csv
 eda_segment_error.csv
 train_image_features.csv
 test_image_features.csv
+```
+
+## Baseline Models
+
+Open [notebooks/02_baseline_models.ipynb](notebooks/02_baseline_models.ipynb) after running the EDA notebook. It:
+
+- reviews available EDA output artifacts
+- uses grouped cross-validation by `image_path`
+- compares median, ridge, histogram gradient boosting, and extra-trees baselines
+- reports global weighted R2 plus per-target and segment diagnostics
+- writes `/kaggle/working/submission.csv`
+
+It also exports:
+
+```text
+baseline_cv_summary.csv
+baseline_per_target.csv
+baseline_segment_error.csv
+submission.csv
 ```
 
 ## Next Experiments
