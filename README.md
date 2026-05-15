@@ -7,13 +7,11 @@
   <img alt="Status" src="https://img.shields.io/badge/Status-Active%20Research-2E7D32?style=flat" height="20">
 </p>
 
-<p>
-  <img src="https://reneweconomy.com.au/wp-content/uploads/2021/02/redbank-power-station-hunter-energy-optimised.jpg" alt="Agricultural biomass landscape" width="520">
-</p>
+Kaggle workflow for the [CSIRO Image2Biomass Prediction](https://www.kaggle.com/competitions/csiro-biomass) competition. The current focus is a reliable validation setup, concise EDA, and a strong first tabular baseline.
 
-Kaggle workflow for the [CSIRO Image2Biomass Prediction](https://www.kaggle.com/competitions/csiro-biomass) competition. The project explores pasture image, metadata, and measurement signals before building baseline models for biomass prediction.
+## 1. Objective
 
-The task is to predict five pasture biomass targets for each image:
+Predict five pasture biomass targets for each image:
 
 - `Dry_Green_g`
 - `Dry_Dead_g`
@@ -21,7 +19,7 @@ The task is to predict five pasture biomass targets for each image:
 - `GDM_g`
 - `Dry_Total_g`
 
-The competition uses one global weighted R2 over all image-target rows. Target weights are:
+The leaderboard metric is one global weighted R2 over all image-target rows. `Dry_Total_g` is the highest-priority target because it carries 50% of the effective metric weight.
 
 | target | weight |
 | --- | ---: |
@@ -31,7 +29,7 @@ The competition uses one global weighted R2 over all image-target rows. Target w
 | `GDM_g` | 0.2 |
 | `Dry_Total_g` | 0.5 |
 
-## Repo Layout
+## 2. Repository
 
 ```text
 .
@@ -41,57 +39,36 @@ The competition uses one global weighted R2 over all image-target rows. Target w
 +-- README.md
 ```
 
-## Kaggle Workflow
-
-This repo is intended to run inside Kaggle notebooks with the competition input mounted at:
+Run the notebooks on Kaggle with competition data mounted at:
 
 ```text
 /kaggle/input/competitions/csiro-biomass/
-+-- train.csv
-+-- test.csv
-+-- sample_submission.csv
-+-- train/
-+-- test/
 ```
 
-## First Notebook
+## 3. Notebook Workflow
 
-Open [notebooks/01_deep_dive_eda.ipynb](notebooks/01_deep_dive_eda.ipynb). It focuses on deep exploratory analysis:
+1. `notebooks/01_deep_dive_eda.ipynb`
+   - Checks data quality, target structure, metric weights, metadata signals, image color features, outliers, and lightweight baseline error patterns.
+   - Exports `eda_insights.csv`, `eda_outlier_review.csv`, `eda_segment_error.csv`, `train_image_features.csv`, and `test_image_features.csv`.
 
-- data quality checks
-- metric weight analysis
-- target distributions and image-level target accounting
-- state, species, date, NDVI, and height effects
-- train-test metadata drift
-- simple image color/texture signals
-- visual image audit grids
-- outlier review exports
-- lightweight baseline error diagnostics for insight generation
+2. `notebooks/02_baseline_models.ipynb`
+   - Uses `GroupKFold` by `image_path`, metric-aligned sample weights, simple image features, and available metadata.
+   - Compares median, ridge, histogram gradient boosting, and extra-trees baselines.
+   - Adds cached EfficientNet-B0 image embeddings when pretrained `torchvision` weights are available.
+   - Tests target-specific models for `Dry_Total_g`, `GDM_g`, and `Dry_Green_g`.
+   - Exports baseline summaries and `submission.csv`.
 
-In Kaggle, upload or paste the notebook, add the competition data, run all cells, and download the output artifacts from the notebook output panel.
+## 4. Current EDA Insights
 
-The notebook is self-contained and assumes Kaggle's standard Python environment. It writes EDA artifacts to `/kaggle/working`:
-
-```text
-eda_insights.csv
-eda_outlier_review.csv
-eda_segment_error.csv
-train_image_features.csv
-test_image_features.csv
-```
-
-## EDA Findings
-
-Current EDA output points to a few modeling priorities:
-
-- `Dry_Total_g` is the most important target for the leaderboard because it carries 50% of the effective metric weight.
-- `Dry_Total_g` also has the widest spread and the highest lightweight-model MAE, so calibration here should be treated as the first modeling priority.
-- `Dry_Total_g` exactly matches the component sum in the EDA checks, making target relationship constraints useful as validation sanity checks and possible post-processing.
-- `Height_Ave_cm` has strong monotonic signal for `Dry_Green_g` with Spearman correlation around `0.80`.
-- `Pre_GSHH_NDVI` is most associated with `GDM_g`, with Spearman correlation around `0.59`.
-- Simple image greenness features are useful: `excess_green` is strongest against `GDM_g`, around `0.52`.
-
-Hardest diagnostic segments from the lightweight EDA model:
+- Dataset shape: 357 train images, 1 public test image, and 5 target rows per image.
+- Data quality: no missing columns in the latest EDA run; train/test sample IDs are unique.
+- Target accounting: `Dry_Total_g` is effectively the sum of `Dry_Green_g`, `Dry_Dead_g`, and `Dry_Clover_g`.
+- Strong metadata signals:
+  - `Height_Ave_cm` vs `Dry_Green_g`: Spearman around `0.80`.
+  - `Pre_GSHH_NDVI` vs `GDM_g`: Spearman around `0.59`.
+- Useful simple image signals:
+  - `excess_green`, `visible_ndvi_proxy`, and `green_red_ratio` are most useful for green biomass and `GDM_g`.
+- Hardest lightweight-baseline segments:
 
 | target | state | MAE | bias | target mean |
 | --- | --- | ---: | ---: | ---: |
@@ -101,38 +78,43 @@ Hardest diagnostic segments from the lightweight EDA model:
 | `Dry_Clover_g` | WA | 11.17 | -1.21 | 22.09 |
 | `Dry_Total_g` | Tas | 9.88 | -0.22 | 36.80 |
 
-Outlier review suggests many legitimate zero-valued clover and dead-matter rows, especially where species composition does not include clover or where WA samples have no dead matter. High-biomass NSW rows should be visually reviewed because they dominate the largest `Dry_Total_g`, `Dry_Green_g`, and `GDM_g` extremes.
+## 5. Current Baseline Results
 
-## Baseline Models
+Latest saved baseline run:
 
-Open [notebooks/02_baseline_models.ipynb](notebooks/02_baseline_models.ipynb) after running the EDA notebook. It:
+| model | weighted R2 | MAE | bias |
+| --- | ---: | ---: | ---: |
+| `extra_trees` | 0.8081 | 6.82 | 0.24 |
+| `hgb` | 0.7958 | 7.47 | 0.39 |
+| `ridge_log` | 0.6449 | 10.60 | -5.66 |
+| `dummy_median` | -0.0376 | 20.45 | 3.62 |
 
-- reviews available EDA output artifacts
-- uses grouped cross-validation by `image_path`
-- drops train-only metadata when the Kaggle test file does not provide it
-- trains with metric-aligned target weights
-- compares median, ridge, histogram gradient boosting, and extra-trees baselines
-- reports global weighted R2 plus per-target and segment diagnostics
-- validates whether enforcing `Dry_Total_g = Dry_Green_g + Dry_Dead_g + Dry_Clover_g` improves local score
-- adds deep-dive diagnostics for high-biomass NSW images, feature-family comparisons, and zero-inflated clover/dead matter
-- writes `/kaggle/working/submission.csv`
+Key baseline findings:
 
-It also exports:
+- `extra_trees` is the current best baseline.
+- Enforcing `Dry_Total_g = Dry_Green_g + Dry_Dead_g + Dry_Clover_g` improves weighted R2 from `0.80806` to `0.81136`.
+- `Dry_Total_g` remains the highest-MAE target, especially in NSW high-biomass examples.
+- Image-only color features are much weaker than the current feature set, so learned image embeddings are the clearest next upgrade.
+- The two-stage zero-inflation check did not improve weighted R2 for `Dry_Clover_g` or `Dry_Dead_g`; keep it diagnostic for now.
 
-```text
-baseline_cv_summary.csv
-baseline_per_target.csv
-baseline_segment_error.csv
-feature_set_cv_summary.csv
-high_biomass_nsw_review.csv
-zero_inflation_summary.csv
-zero_inflation_oof.csv
-submission.csv
-```
+## 6. Next Steps
 
-## Next Experiments
+1. Run the new embedding and target-specific sections on Kaggle.
+   - Compare embeddings alone, tabular/color features alone, and blended models under the same grouped CV.
+   - Check whether target-specific models reduce NSW high-biomass errors.
 
-- Replace simple image features with embeddings from an ImageNet backbone.
-- Use grouped cross-validation by image/date/location metadata.
-- Train a multi-task image model and blend it with tabular models.
-- Add public weather or satellite features by sampling date and state/region.
+2. Improve target strategy based on the new CV output.
+   - Keep target-specific models only where they beat the long-format baseline.
+   - Keep the biomass accounting constraint as validated post-processing.
+
+3. Focus error reduction on hard segments.
+   - Prioritize NSW high-biomass rows and WA clover rows.
+   - Review outliers before treating extreme labels as noise.
+
+4. Strengthen validation.
+   - Keep `GroupKFold(image_path)` as the default.
+   - Add segment-level reporting by target and state for every experiment.
+
+5. Prepare leaderboard iterations.
+   - Track local weighted R2, per-target MAE, and segment error.
+   - Submit only changes that improve grouped CV or clearly improve high-priority target behavior.
