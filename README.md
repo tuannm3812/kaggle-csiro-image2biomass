@@ -39,6 +39,7 @@ The leaderboard metric is one global weighted R2 over all image-target rows. `Dr
 |   +-- 01_deep_dive_eda.ipynb
 |   +-- 02_baseline_models.ipynb
 |   +-- 03_image_embedding_experiments.ipynb
+|   +-- 04_tabular_model_tuning.ipynb
 +-- README.md
 ```
 
@@ -67,6 +68,12 @@ Run the notebooks on Kaggle with competition data mounted at:
    - Compares image color features, optional EfficientNet-B0 embeddings, and PCA-reduced embeddings.
    - Skips pretrained embeddings cleanly when internet is disabled and no local weights are available.
    - Reports grouped CV, per-target metrics, and target/state segment errors for promotion decisions.
+
+4. `notebooks/04_tabular_model_tuning.ipynb`
+   - Focuses on the current strongest tabular/color feature set after EfficientNet-B0 underperformed.
+   - Runs a focused ExtraTrees and HGB tuning sweep.
+   - Tests OOF blends between the best ExtraTrees and HGB models.
+   - Re-validates the biomass total constraint and exports tuning artifacts.
 
 ## 4. Current EDA Insights
 
@@ -126,14 +133,18 @@ Key baseline findings:
    - Keep target-specific models only where they beat the long-format baseline.
    - Keep the biomass accounting constraint as validated post-processing.
 
-5. Focus error reduction on hard segments.
+5. Tune and blend the strongest tabular/color models.
+   - Use `04_tabular_model_tuning.ipynb` to test focused ExtraTrees/HGB configurations and OOF blends.
+   - Promote only models that beat the current constrained baseline and preserve hard-segment behavior.
+
+6. Focus error reduction on hard segments.
    - Prioritize NSW high-biomass rows and WA clover rows.
    - Review outliers before treating extreme labels as noise.
 
-6. Strengthen validation.
+7. Strengthen validation.
    - Keep `GroupKFold(image_path)` as the default.
    - Add segment-level reporting by target and state for every experiment.
 
-7. Prepare leaderboard iterations.
+8. Prepare leaderboard iterations.
    - Track local weighted R2, per-target MAE, and segment error.
    - Submit only changes that improve grouped CV or clearly improve high-priority target behavior.
