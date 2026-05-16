@@ -3,7 +3,7 @@
 <p>
   <img alt="Kaggle" src="https://img.shields.io/badge/Kaggle-CSIRO%20Biomass-20BEFF?style=flat&logo=kaggle&logoColor=white" height="20">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.x-3776AB?style=flat&logo=python&logoColor=white" height="20">
-  <img alt="Notebook" src="https://img.shields.io/badge/Notebook-EDA%20%2B%20Baseline-F37626?style=flat&logo=jupyter&logoColor=white" height="20">
+  <img alt="Notebook" src="https://img.shields.io/badge/Notebook-EDA%20%2B%20Baseline%20%2B%20Experiments-F37626?style=flat&logo=jupyter&logoColor=white" height="20">
   <img alt="Status" src="https://img.shields.io/badge/Status-Active%20Research-2E7D32?style=flat" height="20">
 </p>
 
@@ -36,6 +36,7 @@ The leaderboard metric is one global weighted R2 over all image-target rows. `Dr
 +-- notebooks/
 |   +-- 01_deep_dive_eda.ipynb
 |   +-- 02_baseline_models.ipynb
+|   +-- 03_image_embedding_experiments.ipynb
 +-- README.md
 ```
 
@@ -58,6 +59,12 @@ Run the notebooks on Kaggle with competition data mounted at:
    - Selects the final submission-safe feature family by grouped CV.
    - Tests target-specific models for `Dry_Total_g`, `GDM_g`, and `Dry_Green_g`.
    - Exports baseline summaries and `submission.csv`.
+
+3. `notebooks/03_image_embedding_experiments.ipynb`
+   - Keeps image-embedding experiments separate from the stable baseline notebook.
+   - Compares image color features, optional EfficientNet-B0 embeddings, and PCA-reduced embeddings.
+   - Skips pretrained embeddings cleanly when internet is disabled and no local weights are available.
+   - Reports grouped CV, per-target metrics, and target/state segment errors for promotion decisions.
 
 ## 4. Current EDA Insights
 
@@ -105,22 +112,26 @@ Key baseline findings:
    - Confirm that CV selects the best submission-safe feature family.
    - Confirm whether the biomass constraint helps the selected feature family before submission.
 
-2. Improve embeddings before using them in final submission.
+2. Run the image-embedding experiment notebook.
+   - Use `03_image_embedding_experiments.ipynb` for stronger image features without destabilizing the baseline notebook.
+   - Keep pretrained model downloads disabled for scoring-style Kaggle reruns unless weights are attached as an input dataset.
+
+3. Improve embeddings before using them in final submission.
    - Try stronger backbones, lower-dimensional embedding projections, or ridge/boosting models better suited to dense embeddings.
    - Keep embeddings out of the final model unless grouped CV improves.
 
-3. Improve target strategy based on CV output.
+4. Improve target strategy based on CV output.
    - Keep target-specific models only where they beat the long-format baseline.
    - Keep the biomass accounting constraint as validated post-processing.
 
-4. Focus error reduction on hard segments.
+5. Focus error reduction on hard segments.
    - Prioritize NSW high-biomass rows and WA clover rows.
    - Review outliers before treating extreme labels as noise.
 
-5. Strengthen validation.
+6. Strengthen validation.
    - Keep `GroupKFold(image_path)` as the default.
    - Add segment-level reporting by target and state for every experiment.
 
-6. Prepare leaderboard iterations.
+7. Prepare leaderboard iterations.
    - Track local weighted R2, per-target MAE, and segment error.
    - Submit only changes that improve grouped CV or clearly improve high-priority target behavior.
