@@ -114,6 +114,7 @@ Key baseline findings:
 - Image-only color features are much weaker than the current feature set.
 - The first EfficientNet-B0 embedding run underperformed the tabular/color baseline, so embeddings remain diagnostic until they improve grouped CV.
 - The two-stage zero-inflation check did not improve weighted R2 for `Dry_Clover_g` or `Dry_Dead_g`; keep it diagnostic for now.
+- The first tabular tuning run improved global constrained CV to about `0.81817` with a `70%` ExtraTrees and `30%` HGB blend, but hard-segment MAE must be checked before promotion.
 
 ## 6. Next Steps
 
@@ -136,6 +137,7 @@ Key baseline findings:
 5. Tune and blend the strongest tabular/color models.
    - Use `04_tabular_model_tuning.ipynb` to test focused ExtraTrees/HGB configurations and OOF blends.
    - Promote only models that beat the current constrained baseline and preserve hard-segment behavior.
+   - Review `tabular_tuning_promotion_review.csv` before replacing the stable baseline.
 
 6. Focus error reduction on hard segments.
    - Prioritize NSW high-biomass rows and WA clover rows.
